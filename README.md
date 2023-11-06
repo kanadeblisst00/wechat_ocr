@@ -61,4 +61,4 @@ if __name__ == "__main__":
 
 #### 运行结果
 
-![result](./result.img)
+![result](https://github.com/kanadeblisst00/wechat_ocr/blob/master/result.img)
