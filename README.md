@@ -62,3 +62,7 @@ if __name__ == "__main__":
 #### 运行结果
 
 ![result](./result.png)
+
+## 感谢
+
+https://github.com/EEEEhex/QQImpl
