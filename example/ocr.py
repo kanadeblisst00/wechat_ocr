@@ -1,16 +1,17 @@
 import os
+import json
 import time
-from mmmojo.ocr_manager import OcrManager, OCR_MAX_TASK_ID
+from wechat_ocr.ocr_manager import OcrManager, OCR_MAX_TASK_ID
 
 
 wechat_ocr_dir = "C:\\Users\\Administrator\\AppData\\Roaming\\Tencent\\WeChat\\XPlugin\\Plugins\\WeChatOCR\\7057\\extracted\\WeChatOCR.exe"
 wechat_dir = "D:\\GreenSoftware\\WeChat\\3.9.6.32"
 
-def ocr_result_callback(img_path:str, result_json:str):
+def ocr_result_callback(img_path:str, results:dict):
     result_file = os.path.basename(img_path) + ".json"
     print(f"识别成功，img_path: {img_path}, result_file: {result_file}")
     with open(result_file, 'w', encoding='utf-8') as f:
-       f.write(result_json)
+       f.write(json.dumps(results, ensure_ascii=False, indent=2))
 
 def main():
     ocr_manager = OcrManager(wechat_dir)
@@ -23,13 +24,13 @@ def main():
     # 启动ocr服务
     ocr_manager.StartWeChatOCR()
     # 开始识别图片
-    ocr_manager.DoOCRTask(r"img\1.png")
-    ocr_manager.DoOCRTask(r"img\2.png")
-    ocr_manager.DoOCRTask(r"img\3.png")
+    ocr_manager.DoOCRTask(r"T:\Code\WeChat\OCR\Python\img\1.png")
+    ocr_manager.DoOCRTask(r"T:\Code\WeChat\OCR\Python\img\2.png")
+    ocr_manager.DoOCRTask(r"T:\Code\WeChat\OCR\Python\img\3.png")
     time.sleep(1)
-    # 等待识别输出结果
     while ocr_manager.m_task_id.qsize() != OCR_MAX_TASK_ID:
         pass
+    # 识别输出结果
     ocr_manager.KillWeChatOCR()
     
 

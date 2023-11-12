@@ -1,5 +1,7 @@
 import os
+import json
 import time
+import base64
 from enum import Enum
 from typing import Dict, Callable
 from multiprocessing import Queue, Value
@@ -108,15 +110,43 @@ class OcrManager(XPluginManager):
         ocr_response_array = bytearray(ocr_response_ubyte)
         ocr_response = ocr_protobuf_pb2.OcrResponse()
         ocr_response.ParseFromString(ocr_response_array)
-        json_response = MessageToJson(ocr_response)
+        json_response_str = MessageToJson(ocr_response)
         task_id = ocr_response.task_id
         if not self.m_id_path.get(task_id):
             return
         #print(f"收到识别结果, task_id: {task_id}, result: {json_response}")
         pic_path = self.m_id_path[task_id]
         if self.m_usr_callback:
-            self.m_usr_callback(pic_path, json_response)
+            self.m_usr_callback(pic_path, self.parse_json_response(json_response_str))
         self.SetTaskIdIdle(task_id)
+    
+    def parse_json_response(self, json_response_str:str):
+        json_response = json.loads(json_response_str)
+        results = {
+            "taskId": json_response["taskId"],
+            "ocrResult": []
+        }
+        singleResult = json_response.get("ocrResult", {}).get("singleResult")
+        if not singleResult:
+            return results
+            
+        for i in singleResult:
+            pos = i.get('singlePos', {}).get('pos')
+            if isinstance(pos, list) and len(pos) == 1:
+                pos = pos[0]
+            text = base64.b64decode(i.get("singleStrUtf8", '')).decode('utf-8')
+            r = {
+                "text": text,
+                "location": {
+                    "left": i.get('left'),
+                    "top": i.get("top"),
+                    "right": i.get('right'),
+                    "bottom": i.get('bottom')
+                },
+                "pos": pos
+            }
+            results["ocrResult"].append(r)
+        return results
     
     def GetIdleTaskId(self):
         task_id = self.m_task_id.get(timeout=1)
