@@ -43,7 +43,6 @@ def OCRReadOnPush(request_id:c_uint32, request_info:c_void_p, user_data:py_objec
 
 
 class OcrManager(XPluginManager):
-    m_task_id = Queue(OCR_MAX_TASK_ID)
     m_id_path:Dict[int, str] = {}
     m_usr_lib_dir: str = None
     m_wechatocr_running: bool = False
@@ -52,6 +51,7 @@ class OcrManager(XPluginManager):
 
     def __init__(self, wechat_path) -> None:
         super().__init__(wechat_path)
+        self.m_task_id = Queue(OCR_MAX_TASK_ID)
         for i in range(1, 33):
             self.m_task_id.put(i)
     
@@ -160,5 +160,3 @@ class OcrManager(XPluginManager):
         super().SetOneCallback("kMMRemoteDisconnect", OCRRemoteOnDisConnect)
         super().SetOneCallback("kMMReadPush", OCRReadOnPush)
         super().SetDefaultCallbaks()
-        
-    
